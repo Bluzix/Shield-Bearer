@@ -48,15 +48,21 @@ A list of things I got to get done, or I'm not going to have a game to upload fo
 * The ~~laser cannon~~'s shot can hurt the Bearer when rebounding!
 * Bearer has health, lives, or something that gets lost when hurt!
 * There is a score that is increasing when enemies are shot and destroyed!
-* A game over screen
+* A game over screen!
 ### Not so Critical
 My game won't be the complete vision that I was hoping it would be, but I could still potentially "ship" the game without them.
 * Platforms for the Bearer to jump on
+* A second enemy type
 * Global high score table
 * Touchscreen controls
 * A "Start Game" Screen
+* Increasing abilities for each enemy type
 ### Nice to Haves
 These are things that would be nice to have in the game, if I have the time to make them within the competition.
 * Awesome design for the Bearer, including ~~laser cannon~~
 * Awesome design for the Bearer's Shield
+* Awesome designs for the Enemy Types
+* Cool looking projectiles
+* A background
+* A third or more Enemy Type(s)
 * Joypad support, if even possible
