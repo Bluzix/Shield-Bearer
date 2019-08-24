@@ -35,8 +35,8 @@ These people and software applications have helped me to complete my game!
 A list of things I, as a Developer, should get done for this game!
 ### Critical
 A list of things I got to get done, or I'm not going to have a game to upload for the competition!
-* An index.html file to run the game on!
-* An HTML5 Canvas or some other way to draw my characters!
+* ~~An index.html file to run the game on!~~
+* ~~An HTML5 Canvas or some other way to draw my characters!~~
 * A refresh rate to redraw that "canvas" and get an actual game going!
 * A moveable character with Keyboard controls!
 * Walls to keep that character on the screen!
