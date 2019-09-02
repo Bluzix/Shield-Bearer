@@ -30,6 +30,7 @@ These people and software applications have helped me to complete my game!
 * GitHub, duh!
 * [Atom Text Editor](https://atom.io/)
 * My JavaScript Compressor (I'll use one later for the competition)
+* [jfriend00's docReady](https://github.com/jfriend00/docReady)
 
 ## TODOs
 A list of things I, as a Developer, should get done for this game!
