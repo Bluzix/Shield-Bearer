@@ -1,7 +1,9 @@
-body {
-  background: #000;
+*{
+    margin: 0px;
+    overflow: hidden;
 }
 
-canvas {
-  border: 1px solid gray;
+html, body {
+  background: #000;
+  height: 100%;
 }
