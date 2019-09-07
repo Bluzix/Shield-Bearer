@@ -82,6 +82,14 @@
 // and object for the method to be attached to
 // *** End Code from jfriend00's docReady ***
 
+// setup variables used for Shield Bearer game
+var running = true; // have we not reached a game over?
+var bearer,         // the player character
+    shield,         // the bearer's shield will be it's own object
+    canvas,         // the HTML5 canvas
+    canCon,         // HTML5 canvas' context
+    enemy = [];     // will have multiple enemies
+
 // runShieldBearer has the code to run the game "Shield Bearer"
 function runShieldBearer(){
 
@@ -105,5 +113,13 @@ function runShieldBearer(){
 
 }
 
-// run Shield Bearer using jfriend00's docReady
-docReady(runShieldBearer);
+/* startShieldBearer sets up the interval used to draw Shield Bearer on
+    the HTML5 canvas, it also contains the game over state
+*/
+function startShieldBearer(){
+  // set interval at 60 Frames per second
+  setInterval(runShieldBearer, 1000/60);
+}
+
+// start Shield Bearer using jfriend00's docReady
+docReady(startShieldBearer);
