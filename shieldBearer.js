@@ -84,32 +84,124 @@
 
 // setup variables used for Shield Bearer game
 var running = true; // have we not reached a game over?
+var gravity = 0.8;  // the "force" to pull the player down
+var hp = 100;       // the player hit points; if hp <= 0, running = false
+var score = 0;      // the current score
 var bearer,         // the player character
     shield,         // the bearer's shield will be it's own object
-    canvas,         // the HTML5 canvas
+    gameWindow,     // the HTML5 canvas
     canCon,         // HTML5 canvas' context
-    enemy = [];     // will have multiple enemies
+    enemies = [];   // we will have multiple enemies
+var playerPro = []; // player projectiles
+var enemyPro = [];  // enemy projectiles
+
+// setup gameWindow
+gameWindow = document.getElementById('canvas');
+gameWindow.height = window.innerHeight;
+gameWindow.width = window.innerWidth;
+canCon = gameWindow.getContext("2d");
+
+// class Bearer contains all properties and functions of the player character
+class Bearer{
+  // no argument constructor; starting position
+  constructor(){
+    this.width = 50;
+    this.height = 50;
+    this.x = 100;
+    this.y = gameWindow.height - this.height;
+    this.dx = 0;
+    this.dy = 0;
+    this.mvLeft = false; // moving to the left? No
+    this.mvRight = false; // moving to the right? No
+    this.airborne = false;
+  }
+  // function used to draw object to the gameWindow
+  draw(){
+    canCon.beginPath();
+    canCon.rect(this.x, this.y, this.width, this.height);
+    canCon.strokeStyle = 'blue';
+    canCon.stroke();
+  }
+  // function used to update the position of the object on the gameWindow
+  update(){
+    if(this.y + this.height < canvas.height){
+      this.dy += gravity;
+      this.y += this.dy;
+    }
+    if(this.airborne){
+      this.y += this.dy;
+    }
+    if(this.y + this.height > canvas.height){
+      this.airborne = false;
+      // to not get stuck in the ground
+      this.y = canvas.height - this.height;
+    }
+    this.x += this.dx;
+
+    // keep within the canvas
+    if (this.x < 0){
+      this.x = 0;
+    }
+    else if (this.x + this.width > canvas.width){
+      this.x = canvas.width - this.width;
+    }
+  }
+  // function used to move Bearer to the right (keydown "right")
+  moveRight(){
+    this.dx += 3;
+    this.mvRight
+  }
+  // function used to move Bearer to the left (keydown "left")
+  moveLeft(){
+    this.dx -= 3;
+    this.left = true;
+  }
+  // function used when you stop moving the Bearer right (keyup "right")
+  stopRight(){
+    this.dx -= 3;
+    this.left = false;
+  }
+  // function used when you stop moving the Bearer left (keyup "left")
+  stopLeft(){
+    this.dx += 3;
+    this.left = true;
+  }
+  // function used to make the Bearer jump (keydown "up")
+  jump(){
+    this.dy = -20;
+    this.airborne = true;
+  }
+  // function used to make the Bearer fall after a jump (keyup "up")
+  fall(){
+    // can only "fall" when rising
+    if (this.dy < 0){
+      this.dy = 0;
+    }
+  }
+}
+// update will be used to change the positions of all the objects in the game
+function update(){
+  //TODO: add stuff to update
+  bearer.update();
+}
+
+// draw will be used to clear and draw the new stuff in the gameWindow
+function draw(){
+  //TODO: add stuff to draw
+  bearer.draw();
+}
 
 // runShieldBearer has the code to run the game "Shield Bearer"
 function runShieldBearer(){
 
-  // grab the HTML5 Canvas
-  var gameWindow = document.getElementById('canvas');
+  // redraw the gameWindow
+  update();
+  draw();
 
-  // store usable browser height and width
-  var usableHeigth = document.body.offsetHeight;
-  var usableWidth = document.body.offsetWidth;
-
-  // detect Firefox
-  var usingFirefox = false;
-
-  if (navigator.userAgent.search("Firefox") > -1 ){
-    usingFirefox = true;
+  // check for "Game Over" state, stop game if so
+  if (hp <= 0){
+    running = false;
   }
-
-  // resize canvas to Browser window
-  gameWindow.height = usableHeigth;
-  gameWindow.width = usableWidth;
 
 }
 
@@ -117,9 +209,51 @@ function runShieldBearer(){
     the HTML5 canvas, it also contains the game over state
 */
 function startShieldBearer(){
+
+  // set up the game
+  bearer = new Bearer();
+
   // set interval at 60 Frames per second
-  setInterval(runShieldBearer, 1000/60);
+  var gameInt = setInterval(runShieldBearer, 1000/60);
+
+  // keep the game from going into the "game over" state, until ready
+  //while(running){
+    // blank so that it sits here doing nothing until "game over"
+    // the game is being ran by gameInt, so it shouldn't disrupt the game
+  //}
+
+  /*** The Game Over State ***/
+
+  // stop redrawing the game
+  clearInterval(gameInt);
+
+  // game over message (TODO: track the score)
+  alert("Game Over! Your final score is " + score + "! Refresh Browser to play again!");
 }
+
+// setup keyboard events
+document.addEventListener('keydown', (e)=>{
+  if (e.keyCode == 39 && !bearer.mvRight){ // right
+    bearer.moveRight();
+  }
+  if (e.keyCode == 37 && !bearer.mvLeft){ // left
+    bearer.moveLeft();
+  }
+  if (e.keyCode == 38 && !bearer.airborne){ // up
+    bearer.jump();
+  }
+});
+document.addEventListener('keydown', (e)=>{
+  if (e.keyCode == 39){ // right
+    bearer.stopRight();
+  }
+  if (e.keyCode == 37){ // left
+    bearer.stopLeft();
+  }
+  if (e.keyCode == 38){ // up
+    bearer.fall();
+  }
+});
 
 // start Shield Bearer using jfriend00's docReady
 docReady(startShieldBearer);
