@@ -175,7 +175,7 @@ class Bearer{
   fall(){
     // can only "fall" when rising
     if (this.dy < 0){
-      this.dy = 0;
+      this.dy = this.dy * 0.2; // setting it to zero made it too...magentic
     }
   }
 }
