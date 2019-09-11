@@ -41,13 +41,14 @@ A list of things I got to get done, or I'm not going to have a game to upload fo
 * ~~A refresh rate to redraw that "canvas"~~
 * ~~A moveable character with Keyboard controls!~~
 * ~~Walls to keep that character on the screen!~~
+* ~~A working Shield~~
 * A working Backscatter Buster
 * Enemies to shoot!
 * Enemies that die when shot!
 * Enemy fire to avoid!
 * The Backscatter Buster's shot rebounds off of walls!
 * The Backscatter Buster's shot can hurt the Bearer when rebounding!
-* Bearer has health, lives, or something that gets lost when hurt!
+* Bearer has **health**, lives, or something that gets lost when hurt!
 * There is a score that is increasing when enemies are shot and destroyed!
 * A game over screen!
 ### Not so Critical

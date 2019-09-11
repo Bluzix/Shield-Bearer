@@ -191,10 +191,40 @@ fall(){
   }
 }
 }
+
+// class Shield contains all properties and functions of the Shield
+class Shield{
+  // no argument constructor
+  constructor(){
+    this.above = 10; // how much taller should the Shield be than the Bearer
+    this.width = bearer.width / 2;
+    this.height = bearer.height + 2 * this.above;
+    this.x = 0;
+    this.y = -this.height; // spawn off screen, snap to Bearer later
+  }
+  update(){
+    // snap to the Bearer; placement depends on direction the Bearer is facing
+    if(bearer.faceLeft){
+      this.x = bearer.x - this.width;
+    }
+    else{
+      this.x = bearer.x + bearer.width;
+    }
+    this.y = bearer.y - this.above;
+  }
+  draw(){
+    canCon.beginPath();
+    canCon.rect(this.x, this.y, this.width, this.height);
+    canCon.fillStyle = 'lightgray';
+    canCon.fill();
+  }
+}
+
 // update will be used to change the positions of all the objects in the game
 function update(){
 //TODO: add stuff to update
 bearer.update();
+shield.update();
 }
 
 // draw will be used to clear and draw the new stuff in the gameWindow
@@ -203,6 +233,7 @@ canCon.clearRect(0, 0, canCon.width, canCon.height);
 
 //TODO: add stuff to draw
 bearer.draw();
+shield.draw();
 }
 
 // runShieldBearer has the code to run the game "Shield Bearer"
@@ -229,6 +260,7 @@ tracker = new KeyTracker();
 
 // set up the game
 bearer = new Bearer();
+shield = new Shield();
 
 // set interval at 60 Frames per second
 var gameInt = setInterval(runShieldBearer, 1000/60);
