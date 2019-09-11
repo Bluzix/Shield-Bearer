@@ -38,9 +38,9 @@ A list of things I, as a Developer, should get done for this game!
 A list of things I got to get done, or I'm not going to have a game to upload for the competition!
 * ~~An index.html file to run the game on!~~
 * ~~An HTML5 Canvas or some other way to draw my characters!~~
-* A refresh rate to redraw that "canvas" and get an actual game going!
-* A moveable character with Keyboard controls!
-* Walls to keep that character on the screen!
+* ~~A refresh rate to redraw that "canvas"~~
+* ~~A moveable character with Keyboard controls!~~
+* ~~Walls to keep that character on the screen!~~
 * A working Backscatter Buster
 * Enemies to shoot!
 * Enemies that die when shot!

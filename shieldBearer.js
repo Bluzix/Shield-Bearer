@@ -87,7 +87,8 @@ var running = true; // have we not reached a game over?
 var gravity = 0.8;  // the "force" to pull the player down
 var hp = 100;       // the player hit points; if hp <= 0, running = false
 var score = 0;      // the current score
-var bearer,         // the player character
+var tracker,      // will track our inputs
+  bearer,         // the player character
   shield,         // the bearer's shield will be it's own object
   gameWindow,     // the HTML5 canvas
   canCon,         // HTML5 canvas' context
@@ -105,6 +106,14 @@ canCon = gameWindow.getContext("2d");
 canCon.height = window.innerHeight;
 canCon.width = window.innerWidth;
 
+// class KeyTracker contains variables used to track Keyboard Inputs
+class KeyTracker{
+  constructor(){
+    this.leftDown = false;
+    this.rightDown = false;
+  }
+}
+
 // class Bearer contains all properties and functions of the player character
 class Bearer{
 // no argument constructor; starting position
@@ -115,16 +124,17 @@ constructor(){
   this.y = gameWindow.height - this.height;
   this.dx = 0;
   this.dy = 0;
-  this.mvLeft = false; // moving to the left? No
-  this.mvRight = false; // moving to the right? No
+  this.faceLeft = false; // is character facing left
   this.airborne = false;
+  this.maxJumps = 2;
+  this.avaliableJumps = this.maxJumps;
 }
 // function used to draw object to the gameWindow
 draw(){
   canCon.beginPath();
   canCon.rect(this.x, this.y, this.width, this.height);
-  canCon.strokeStyle = 'blue';
-  canCon.stroke();
+  canCon.fillStyle = 'blue';
+  canCon.fill();
 }
 // function used to update the position of the object on the gameWindow
 update(){
@@ -135,10 +145,25 @@ update(){
   if(this.airborne){
     this.y += this.dy;
   }
+  // hit the ground while falling
   if(this.y + this.height > gameWindow.height){
     this.airborne = false;
+    this.avaliableJumps = this.maxJumps;
     // to not get stuck in the ground
     this.y = gameWindow.height - this.height;
+  }
+
+  // control dx using KeyTracker object
+  if ((tracker.leftDown && tracker.rightDown) || (!tracker.leftDown && !tracker.rightDown)){
+    this.dx = 0;
+  }
+  else if (tracker.leftDown){
+    this.dx = -3;
+    this.faceLeft = true;
+  }
+  else if (tracker.rightDown){
+    this.dx = 3;
+    this.faceLeft = false;
   }
   this.x += this.dx;
 
@@ -150,30 +175,13 @@ update(){
     this.x = gameWindow.width - this.width;
   }
 }
-// function used to move Bearer to the right (keydown "right")
-moveRight(){
-  this.dx += 3;
-  this.mvRight = true;
-}
-// function used to move Bearer to the left (keydown "left")
-moveLeft(){
-  this.dx -= 3;
-  this.mvleft = true;
-}
-// function used when you stop moving the Bearer right (keyup "right")
-stopRight(){
-  this.dx -= 3;
-  this.mvRight = false;
-}
-// function used when you stop moving the Bearer left (keyup "left")
-stopLeft(){
-  this.dx += 3;
-  this.mvLeft = false;
-}
 // function used to make the Bearer jump (keydown "up")
 jump(){
-  this.dy = -20;
-  this.airborne = true;
+  if (this.avaliableJumps > 0){
+    this.avaliableJumps -= 1;
+    this.dy = -20;
+    this.airborne = true;
+  }
 }
 // function used to make the Bearer fall after a jump (keyup "up")
 fall(){
@@ -216,6 +224,9 @@ if (hp <= 0){
 */
 function startShieldBearer(){
 
+// set up keyboard tracker
+tracker = new KeyTracker();
+
 // set up the game
 bearer = new Bearer();
 
@@ -241,26 +252,30 @@ if(hp <= 0){
 
 // setup keyboard events
 document.addEventListener('keydown', (e)=>{
-if (e.keyCode == 39 && !bearer.mvRight){ // right
+if (e.keyCode == 39 || e.keyCode == 68){ // right or d
   console.log(bearer.dx);
-  
-  bearer.moveRight();
+
+  // move right
+  tracker.rightDown = true;
 }
-if (e.keyCode == 37 && !bearer.mvLeft){ // left
-  bearer.moveLeft();
+if (e.keyCode == 37 || e.keyCode == 65){ // left or a
+  // move left
+  tracker.leftDown = true;
 }
-if (e.keyCode == 38 && !bearer.airborne){ // up
+if (e.keyCode == 38 || e.keyCode == 87){ // up or w
   bearer.jump();
 }
 });
 document.addEventListener('keyup', (e)=>{
-if (e.keyCode == 39){ // right
-  bearer.stopRight();
+if (e.keyCode == 39 || e.keyCode == 68){ // right or d
+  // stop moving right
+  tracker.rightDown = false;
 }
-if (e.keyCode == 37){ // left
-  bearer.stopLeft();
+if (e.keyCode == 37 || e.keyCode == 65){ // left or a
+  // stop moving left
+  tracker.leftDown = false;
 }
-if (e.keyCode == 38){ // up
+if (e.keyCode == 38 || e.keyCode == 87){ // up or w
   bearer.fall();
 }
 });
