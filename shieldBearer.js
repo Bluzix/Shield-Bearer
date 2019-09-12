@@ -84,8 +84,9 @@
 
 // setup variables used for Shield Bearer game
 var running = true; // have we not reached a game over?
-var gravity = 0.8;  // the "force" to pull the player down
-var hp = 100;       // the player hit points; if hp <= 0, running = false
+const gravity = 0.8;  // the "force" to pull the player down
+const maxHp = 100;  // the maximum amount of hit points the player can have
+var hp = maxHp;       // the player hit points; if hp <= 0, running = false
 var score = 0;      // the current score
 var tracker,      // will track our inputs
   bearer,         // the player character
@@ -220,6 +221,37 @@ class Shield{
   }
 }
 
+// class ScoreDisplay is a static class used to display the score
+class ScoreDisplay{
+  static draw(){
+    const point = 10;
+    const color = "rgba(255,255,255,0.5)";
+    canCon.font = "30px Arial";
+    canCon.fillStyle = color;
+    canCon.fillText("Score: " + score, point, point * 2.5);
+  }
+}
+
+// class HealthDisplay is a static class used to display the Bearer's health
+class HealthDisplay{
+  static draw(){
+    const maxHeight = 150;
+    const maxWidth = 25;
+    const point = 10;
+
+    // draw the health part
+    canCon.beginPath();
+    canCon.rect(point,point*3.5 + Math.round(maxHeight - (maxHeight * (hp/maxHp))),maxWidth,Math.round(maxHeight * (hp/maxHp)));
+    // color depends on health %
+    canCon.fillStyle = "rgba(" + Math.round(255 - (255 * (hp/maxHp))) + "," + Math.round(255 * (hp/maxHp)) + ",0,0.5)";
+    canCon.fill();
+    // draw boarder for health bar
+    canCon.beginPath();
+    canCon.strokeStyle = 'gray';
+    canCon.rect(point,point*3.5,maxWidth,maxHeight);
+    canCon.stroke();
+  }
+}
 // update will be used to change the positions of all the objects in the game
 function update(){
 //TODO: add stuff to update
@@ -234,6 +266,10 @@ canCon.clearRect(0, 0, canCon.width, canCon.height);
 //TODO: add stuff to draw
 bearer.draw();
 shield.draw();
+
+// draw HUD over everything
+ScoreDisplay.draw();
+HealthDisplay.draw();
 }
 
 // runShieldBearer has the code to run the game "Shield Bearer"
@@ -285,8 +321,6 @@ if(hp <= 0){
 // setup keyboard events
 document.addEventListener('keydown', (e)=>{
 if (e.keyCode == 39 || e.keyCode == 68){ // right or d
-  console.log(bearer.dx);
-
   // move right
   tracker.rightDown = true;
 }
