@@ -129,6 +129,8 @@ constructor(){
   this.airborne = false;
   this.maxJumps = 2;
   this.avaliableJumps = this.maxJumps;
+  this.armY = 5; // where is the Bearer's arm from this.y
+  this.firing = false; // in case I want to create a sprite of the Bearer firing the Backscatter Buster
 }
 // function used to draw object to the gameWindow
 draw(){
@@ -191,6 +193,11 @@ fall(){
     this.dy = 0;
   }
 }
+// function used when firing the Backscatter Buster
+fire(){
+  this.firing = true;
+  playerPro.push(new playerProjectile());
+}
 }
 
 // class Shield contains all properties and functions of the Shield
@@ -200,18 +207,26 @@ class Shield{
     this.above = 10; // how much taller should the Shield be than the Bearer
     this.width = bearer.width / 2;
     this.height = bearer.height + 2 * this.above;
-    this.x = 0;
-    this.y = -this.height; // spawn off screen, snap to Bearer later
+    this.x = -this.width; // spawn off screen, snap to Bearer later
+    this.y = -this.height;
+    this.dropped = false; // did the Bearer put the shield down to fire
+    this.timeToRaise = 500; // ms to raise the Shield after being dropped
   }
   update(){
     // snap to the Bearer; placement depends on direction the Bearer is facing
-    if(bearer.faceLeft){
-      this.x = bearer.x - this.width;
+    if (this.dropped){
+      this.y = -this.width;
+      this.x = -this.height;
     }
     else{
-      this.x = bearer.x + bearer.width;
+      if(bearer.faceLeft){
+        this.x = bearer.x - this.width;
+      }
+      else{
+        this.x = bearer.x + bearer.width;
+      }
+      this.y = bearer.y - this.above;
     }
-    this.y = bearer.y - this.above;
   }
   draw(){
     canCon.beginPath();
@@ -219,6 +234,19 @@ class Shield{
     canCon.fillStyle = 'lightgray';
     canCon.fill();
   }
+  drop(){
+    if (this.dropped){
+      clearTimeout(this.coolDown);
+    }
+    this.coolDown = setTimeout(raise,this.timeToRaise);
+    this.dropped = true;
+  }
+}
+
+// function raise will raise the shield after timeout
+function raise(){
+  clearTimeout(shield.coolDown);
+  shield.dropped = false;
 }
 
 // class ScoreDisplay is a static class used to display the score
@@ -252,11 +280,58 @@ class HealthDisplay{
     canCon.stroke();
   }
 }
+
+// class playerProjectile is a class for the Bearer's Backscatter Buster Shots
+class playerProjectile{
+  // no argument constructor
+  constructor(){
+    this.height = 10;
+    this.width = 20;
+    this.speed = 6;
+    this.y = bearer.y + bearer.armY;
+    this.dead = false; // remove from playerPro array?
+    if (bearer.faceLeft){
+      this.x = bearer.x - this.width;
+      this.dx = -this.speed;
+    }
+    else{
+      this.x = bearer.x + bearer.width;
+      this.dx = this.speed;
+    }
+  }
+  update(){
+    this.x = this.x + this.dx;
+
+    // rebound or reflect if outside of Canvas
+    if (this.x < 0){
+      this.dx *= -1;
+      this.x = 0;
+    }
+    else if (this.x + this.width > gameWindow.width){
+      this.dx *= -1;
+      this.x = gameWindow.width - this.width;
+    }
+  }
+  draw(){
+    canCon.beginPath();
+    canCon.rect(this.x, this.y, this.width, this.height);
+    canCon.fillStyle = 'cyan';
+    canCon.fill();
+  }
+}
+
 // update will be used to change the positions of all the objects in the game
 function update(){
 //TODO: add stuff to update
 bearer.update();
 shield.update();
+
+// update Backscatter Buster Shots
+for(var index = 1; index < playerPro.length; index++){
+  playerPro[index].update();
+
+  // TODO: splice to remove if dead
+}
 }
 
 // draw will be used to clear and draw the new stuff in the gameWindow
@@ -266,6 +341,11 @@ canCon.clearRect(0, 0, canCon.width, canCon.height);
 //TODO: add stuff to draw
 bearer.draw();
 shield.draw();
+
+// draw Backscatter Buster Shots
+for(var index = 1; index < playerPro.length; index++){
+  playerPro[index].draw();
+}
 
 // draw HUD over everything
 ScoreDisplay.draw();
@@ -331,6 +411,10 @@ if (e.keyCode == 37 || e.keyCode == 65){ // left or a
 if (e.keyCode == 38 || e.keyCode == 87){ // up or w
   bearer.jump();
 }
+if (e.keyCode == 32){ // spacebar
+  shield.drop();
+  bearer.fire();
+}
 });
 document.addEventListener('keyup', (e)=>{
 if (e.keyCode == 39 || e.keyCode == 68){ // right or d
@@ -343,6 +427,9 @@ if (e.keyCode == 37 || e.keyCode == 65){ // left or a
 }
 if (e.keyCode == 38 || e.keyCode == 87){ // up or w
   bearer.fall();
+}
+if (e.keyCode == 32){ // spacebar
+  bearer.firing = false;
 }
 });
 
