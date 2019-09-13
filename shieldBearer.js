@@ -89,6 +89,10 @@ const maxHp = 100;  // the maximum amount of hit points the player can have
 var hp = maxHp;       // the player hit points; if hp <= 0, running = false
 var score = 0;      // the current score
 var gameInt = 0;  // Id for the interval running the game
+var spawnInt = 0; // Id for the interval running the enemy spawner
+var fireInt = 0; // Id for the interval running the fire rate for spiders
+var maxSpiders = 1; // currently, how many spiders can be on the screen at once
+var maxTotalSpiders = 10; // the maximum amount of spiders that can be on the screen at once
 var tracker,      // will track our inputs
   bearer,         // the player character
   shield,         // the bearer's shield will be it's own object
@@ -205,10 +209,17 @@ hit(dmg){
 
   /*** The Game Over State ***/
   if(hp <= 0){
-    // stop redrawing the game
+    // stop redrawing the game, spawning enemies, and firing enemyProjectiles
     clearInterval(gameInt);
+    clearInterval(spawnInt);
+    clearInterval(fireInt);
 
-    // game over message (TODO: track the score)
+    // stop every spider's firing timer
+    for (var index = 0; index < enemies.length;index++){
+      enemies[index].stop();
+    }
+
+    // game over message
     alert("Game Over! Your final score is " + score + "! Refresh Browser to play again!");
   }
 }
@@ -327,6 +338,15 @@ class playerProjectile{
       this.x = gameWindow.width - this.width;
     }
 
+    // check for collisions with enemies
+    for (var index = 0; index < enemies.length; index++){
+      if (collisionCheck(this,enemies[index])){
+        this.dead = true;
+        enemies[index].die();
+        break;
+      }
+    }
+
     // check if position on the Shield
     if (!this.dead && collisionCheck(this,shield)){
       this.dead = true;
@@ -341,6 +361,118 @@ class playerProjectile{
     canCon.rect(this.x, this.y, this.width, this.height);
     canCon.fillStyle = 'cyan';
     canCon.fill();
+  }
+}
+
+// class spider is a class for the enemy robot spiders
+class spider{
+  // no argument constructor
+  constructor(){
+    this.height = 50;
+    this.width = 50;
+    this.dead = false;
+    this.stopped = false;
+    this.startY = -this.height; // spawn above the canvas
+    this.abdomen = Math.floor(this.height/4);
+    this.destY = Math.floor(Math.random() * (gameWindow.height - this.height)) + (this.height * 4);
+    this.y = this.startY;
+    this.x = Math.floor(Math.random() * (gameWindow.width - this.width));
+    this.dy = 3;
+
+    // to fix a destY bug
+    if (this.destY + this.height > gameWindow.height){
+      this.destY = gameWindow.height - this.height;
+    }
+  }
+  update(){
+    if (!this.stopped){
+      this.y += this.dy;
+      if (this.y >= this.destY){
+        this.y = this.destY;
+        this.stopped = true;
+      }
+    }
+  }
+  draw(){
+    // draw web
+    canCon.beginPath();
+    canCon.strokeStyle = "#FFF";
+    canCon.moveTo(this.x + this.width/2, this.startY);
+    canCon.lineTo(this.x + this.width/2, this.y);
+    canCon.stroke();
+
+    // draw spider
+    canCon.beginPath();
+    canCon.rect(this.x,this.y,this.width,this.height);
+    canCon.fillStyle = "red";
+    canCon.fill();
+  }
+  die(){
+    this.dead = true;
+    score++;
+
+    // increase spiders on the screen after each 5 points
+    if (score % 5 == 0 && maxSpiders < maxTotalSpiders){
+      maxSpiders++;
+    }
+  }
+}
+
+// class enemyProjectile holds the properties and functions of an enemy's projectiles
+class enemyProjectile{
+  // constructor with an enemy object as its parameter
+  constructor(enemy){
+    this.height = 10;
+    this.width = 10;
+    this.dead = false;
+    this.x = enemy.x + Math.floor(enemy.width/2) - Math.floor(this.width/2);
+    this.y = enemy.y + enemy.abdomen - Math.floor(this.height/2);
+    this.dx = Math.floor((bearer.x + Math.floor(bearer.width/2) - (this.x + Math.floor(this.width/2)))/100);
+    this.dy = Math.floor((bearer.y + Math.floor(bearer.height/2) - (this.y + Math.floor(this.height/2)))/100);
+    this.dmgPlayer = 5;
+  }
+  update(){
+    this.y += this.dy;
+    this.x += this.dx;
+
+    // check for going out of bounds, delete if so
+    if (this.x + this.width < 0 || this.x > gameWindow.width || this.y > gameWindow.height || this.y + this.height < 0){
+      this.dead = true;
+    }
+
+    // check for collisions
+    if (!this.dead && collisionCheck(this,shield)){
+      this.dead = true;
+    }
+    else if (!this.dead && collisionCheck(this,bearer)){
+      this.dead = true;
+      bearer.hit(this.dmgPlayer);
+    }
+  }
+  draw(){
+    // draw projectile
+    canCon.beginPath();
+    canCon.rect(this.x,this.y,this.width,this.height);
+    canCon.fillStyle = "#FFF";
+    canCon.fill();
+  }
+}
+
+// function spiderFire will create enemyProjectiles for the spiders
+function spiderFire(){
+  // search through array for spider enemies that are stopped
+  for (var index = 0; index < enemies.length; index++){
+    if (enemies[index].stopped){
+      enemyPro.push(new enemyProjectile(enemies[index]));
+    }
+  }
+}
+
+// function spawnEnemies will create an enemy from timeout spawnInt
+function spawnEnemies(){
+  //add a spider when there can be more on the screen
+  if (enemies.length < maxSpiders){
+    enemies.push(new spider());
   }
 }
 
@@ -363,17 +495,37 @@ function collisionCheck(obj1,obj2,swap=true){
 
 // update will be used to change the positions of all the objects in the game
 function update(){
-//TODO: add stuff to update
+//stuff to update
 bearer.update();
 shield.update();
 
 // update Backscatter Buster Shots
-for(var index = 1; index < playerPro.length; index++){
+for(var index = 0; index < playerPro.length; index++){
   playerPro[index].update();
 
   // splice to remove projectile if dead
   if(playerPro[index].dead){
     playerPro.splice(index,1);
+  }
+}
+
+// update enemies
+for(var index = 0; index < enemies.length; index++){
+  enemies[index].update();
+
+  // splice to remove enemy if dead
+  if(enemies[index].dead){
+    enemies.splice(index,1);
+  }
+}
+
+// update enemy projectiles
+for (var index = 0; index < enemyPro.length; index++){
+  enemyPro[index].update();
+
+  // splice to remove projectile if dead
+  if(enemyPro[index].dead){
+    enemyPro.splice(index,1);
   }
 }
 }
@@ -382,13 +534,23 @@ for(var index = 1; index < playerPro.length; index++){
 function draw(){
 canCon.clearRect(0, 0, canCon.width, canCon.height);
 
-//TODO: add stuff to draw
+//stuff to draw
 bearer.draw();
 shield.draw();
 
 // draw Backscatter Buster Shots
-for(var index = 1; index < playerPro.length; index++){
+for(var index = 0; index < playerPro.length; index++){
   playerPro[index].draw();
+}
+
+// draw enemies
+for(var index = 0; index < enemies.length; index++){
+  enemies[index].draw();
+}
+
+// draw enemy projectiles
+for(var index = 0; index < enemyPro.length; index++){
+  enemyPro[index].draw();
 }
 
 // draw HUD over everything
@@ -419,6 +581,12 @@ shield = new Shield();
 
 // set interval at 60 Frames per second
 gameInt = setInterval(runShieldBearer, 1000/60);
+
+// set interval to spawn enemies
+spawnInt = setInterval(spawnEnemies,1000);
+
+// set interval to fire projectiles from enemies
+fireInt = setInterval(spiderFire,1000);
 }
 
 // setup keyboard events
