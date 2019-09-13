@@ -88,6 +88,7 @@ const gravity = 0.8;  // the "force" to pull the player down
 const maxHp = 100;  // the maximum amount of hit points the player can have
 var hp = maxHp;       // the player hit points; if hp <= 0, running = false
 var score = 0;      // the current score
+var gameInt = 0;  // Id for the interval running the game
 var tracker,      // will track our inputs
   bearer,         // the player character
   shield,         // the bearer's shield will be it's own object
@@ -198,6 +199,19 @@ fire(){
   this.firing = true;
   playerPro.push(new playerProjectile());
 }
+// function used to make the Bearer take damage
+hit(dmg){
+  hp -= dmg;
+
+  /*** The Game Over State ***/
+  if(hp <= 0){
+    // stop redrawing the game
+    clearInterval(gameInt);
+
+    // game over message (TODO: track the score)
+    alert("Game Over! Your final score is " + score + "! Refresh Browser to play again!");
+  }
+}
 }
 
 // class Shield contains all properties and functions of the Shield
@@ -290,6 +304,7 @@ class playerProjectile{
     this.speed = 6;
     this.y = bearer.y + bearer.armY;
     this.dead = false; // remove from playerPro array?
+    this.dmgPlayer = 5; // damage to do to the Bearer (PC)
     if (bearer.faceLeft){
       this.x = bearer.x - this.width;
       this.dx = -this.speed;
@@ -311,12 +326,38 @@ class playerProjectile{
       this.dx *= -1;
       this.x = gameWindow.width - this.width;
     }
+
+    // check if position on the Shield
+    if (!this.dead && collisionCheck(this,shield)){
+      this.dead = true;
+    }
+    else if (!this.dead && collisionCheck(this,bearer)){
+      this.dead = true;
+      bearer.hit(this.dmgPlayer);
+    }
   }
   draw(){
     canCon.beginPath();
     canCon.rect(this.x, this.y, this.width, this.height);
     canCon.fillStyle = 'cyan';
     canCon.fill();
+  }
+}
+
+/* function collisionCheck(obj1,obj2) checks for collisions between obj1 and obj2
+* - obj1 and obj2 are two objects with an x, y, height, and width
+* - swap is a boolean: if true, at the end it will swap the obj1 and obj2 and call itself again
+* - returns true if there is a collision between obj1 and obj2, false if not
+*/
+function collisionCheck(obj1,obj2,swap=true){
+  if (obj2.x >= obj1.x && obj2.y >= obj1.y && obj2.x <= (obj1.x + obj1.width) && obj2.y <= (obj1.y + obj1.width)){
+    return true;
+  }
+  else if (swap){
+    return collisionCheck(obj2,obj1,false);
+  }
+  else {
+    return false;
   }
 }
 
@@ -330,7 +371,10 @@ shield.update();
 for(var index = 1; index < playerPro.length; index++){
   playerPro[index].update();
 
-  // TODO: splice to remove if dead
+  // splice to remove projectile if dead
+  if(playerPro[index].dead){
+    playerPro.splice(index,1);
+  }
 }
 }
 
@@ -359,11 +403,6 @@ function runShieldBearer(){
 update();
 draw();
 
-// check for "Game Over" state, stop game if so
-if (hp <= 0){
-  running = false;
-}
-
 }
 
 /* startShieldBearer sets up the interval used to draw Shield Bearer on
@@ -379,23 +418,7 @@ bearer = new Bearer();
 shield = new Shield();
 
 // set interval at 60 Frames per second
-var gameInt = setInterval(runShieldBearer, 1000/60);
-
-// keep the game from going into the "game over" state, until ready
-//while(running){
-  // blank so that it sits here doing nothing until "game over"
-  // the game is being ran by gameInt, so it shouldn't disrupt the game
-//}
-
-/*** The Game Over State ***/
-if(hp <= 0){
-  // stop redrawing the game
-  clearInterval(gameInt);
-
-  // game over message (TODO: track the score)
-  alert("Game Over! Your final score is " + score + "! Refresh Browser to play again!");
-}
-
+gameInt = setInterval(runShieldBearer, 1000/60);
 }
 
 // setup keyboard events

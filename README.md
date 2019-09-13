@@ -27,6 +27,7 @@ No joypad or console controller support...yet.
 
 ## Credits
 These people and software applications have helped me to complete my game!
+* [jedulz](https://github.com/jedulz)
 * GitHub, duh!
 * [Atom Text Editor](https://atom.io/)
 * My JavaScript Compressor (I'll use one later for the competition)
@@ -48,11 +49,11 @@ A list of things I got to get done, or I'm not going to have a game to upload fo
 * The Backscatter Buster shot is remove when it hits the enemy
 * Enemy fire to avoid!
 * ~~The Backscatter Buster's shot rebounds off of walls!~~
-* The Backscatter Buster shot is remove when it hits the Shield
-* The Backscatter Buster's shot can hurt the Bearer when rebounding!
-* Bearer has **health**, lives, or something that gets lost when hurt!
+* ~~The Backscatter Buster shot is remove when it hits the Shield~~
+* ~~The Backscatter Buster's shot can hurt the Bearer when rebounding!~~
+* ~~Bearer has **health**, lives, or something that gets lost when hurt!~~
 * There is a score that is increasing when enemies are shot and destroyed!
-* A game over screen!
+* ~~A game over screen!~~
 ### Not so Critical
 My game won't be the complete vision that I was hoping it would be, but I could still potentially "ship" the game without them.
 * Platforms for the Bearer to jump on
